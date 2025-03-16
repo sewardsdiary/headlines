@@ -12,3 +12,11 @@ serde = { version = "1.0.130", features = ["derive"] }
 tracing = "0.1.29"
 tracing-subscriber = "0.2.25"
 newsapi = {path = "../newsapi"}
+
+# A cdylib in Rust is a type of dynamic library that provides a C-compatible ABI (Application Binary Interface). 
+# It is typically used when Rust code needs to be called from C, C++, Python, or other languages that support dynamic linking.
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+tracing-wasm = "0.2.0"

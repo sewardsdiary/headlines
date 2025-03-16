@@ -149,6 +149,29 @@ impl NewsAPI {
             _ => return Err(map_response_err(response.code)),
         }
     }
+
+    #[cfg(target_arch = "wasm32")]
+    pub async fn fetch_web(&self) -> Result<NewsAPIResponse, NewsApiError> {
+        use ureq::{request, Request};
+
+        let url = self.prepare_url()?;
+        let req = reqwasm::http::Request::get(&url).header("Authorization", &self.api_key);
+        let response  = req
+            .send()
+            .await
+            .map_err(|e| NewsApiError::BadRequest("Failed sending request"))?;
+
+        let json_response: NewsAPIResponse = response
+            .json()
+            .await
+            .map_err(|e| NewsApiError::BadRequest("Failed converting request to json"))?;
+
+        match json_response.status.as_str() {
+            "ok" => return Ok(json_response),
+            _ => return Err(map_response_err(json_response.code)),
+        }
+
+    }
 }
 
 fn map_response_err(code: Option<String>) -> NewsApiError {
