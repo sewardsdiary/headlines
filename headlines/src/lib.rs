@@ -24,6 +24,7 @@ impl App for Headlines {
 
         self.news_rx = Some(news_rx);
     
+        #[cfg(not(target_arch="wasm32"))]
         thread::spawn(move || {
             if !api_key.is_empty() {
                 fetch_news(&api_key, &mut news_tx);
@@ -40,6 +41,13 @@ impl App for Headlines {
                 }
             }
         });
+
+        #[cfg(target_arch="wasm32")]
+        gloo_timers::callback::Timeout::new(10, move || {
+
+        }).forget();
+
+
         self.configure_fonts(ctx);
     }
     fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &mut eframe::epi::Frame<'_>) {
